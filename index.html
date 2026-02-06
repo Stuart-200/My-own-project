@@ -70,108 +70,127 @@
     </div>
 
     <script>
-        const container = document.getElementById('container');
-        const registerBtn = document.getElementById('register');
-        const loginBtn = document.getElementById('login');
 
-        registerBtn.addEventListener('click', () => {
-            container.classList.add("active");
-        });
+    document.addEventListener("DOMContentLoaded", () => {
+
+    const container = document.getElementById('container');
+            const registerBtn = document.getElementById('register');
+            const loginBtn = document.getElementById('login');
+
+            /* Optional default admin login */
+            const defaultEmail = "admin@example.com";
+            const defaultPassword = "admin123";
+
+            if (registerBtn && loginBtn && container) {
+                registerBtn.addEventListener('click', () => {
+                    container.classList.add("active");
+                });
 
         loginBtn.addEventListener('click', () => {
-            container.classList.remove("active");
+                container.classList.remove("active");
         });
+    }
 
-        document.getElementById('signUpForm').addEventListener('submit', function (e) {
-            e.preventDefault();
+            /* ---------- SIGN UP ---------- */
+            const signUpForm = document.getElementById('signUpForm');
+            if (signUpForm) {
+                signUpForm.addEventListener('submit', function (e) {
+                    e.preventDefault();
 
-            const name = document.getElementById('signupName').value;
-            const email = document.getElementById('signupEmail').value;
-            const password = document.getElementById('signupPassword').value;
-            const phone = document.getElementById('signupPhone').value;
-            const message = document.getElementById('signupMessage');
+                    const name = document.getElementById('signupName').value.trim();
+                    const email = document.getElementById('signupEmail').value.trim();
+                    const password = document.getElementById('signupPassword').value;
+                    const phone = document.getElementById('signupPhone').value.trim();
+                    const message = document.getElementById('signupMessage');
 
-            if (name && email && password && phone) {
-                localStorage.setItem('user_' + email, JSON.stringify({
-                    name: name,
-                    email: email,
-                    password: password,
-                }));
+                    if (name && email && password && phone) {
+                        localStorage.setItem(
+                            'user_' + email,
+                            JSON.stringify({ name, email, password })
+                        );
 
-                message.textContent = 'Account created successfully! Please sign in.';
-                message.style.color = '#28a745';
-                message.style.display = 'block';
+                        message.textContent = 'Account created successfully! Please sign in.';
+                        message.style.color = '#28a745';
+                        message.style.display = 'block';
 
-                setTimeout(() => {
-                    container.classList.remove("active");
-                    document.getElementById('signUpForm').reset();
-                    message.style.display = 'none';
-                }, 2000);
-            } else {
-                message.textContent = 'Please fill in all fields';
-                message.style.color = '#dc3545';
-                message.style.display = 'block';
-            }
-        });
+                        setTimeout(() => {
+                            container.classList.remove("active");
+                            signUpForm.reset();
+                            message.style.display = 'none';
+                        }, 2000);
 
-        
-        document.getElementById('signInForm').addEventListener('submit', function (e) {
-            e.preventDefault();
-            sessionStorage.setItem("loggedIn", "true");
+                    } else {
+                        message.textContent = 'Please fill in all fields';
+                        message.style.color = '#dc3545';
+                        message.style.display = 'block';
+                    }
+                });
+    }
 
+            /* ---------- SIGN IN ---------- */
+            const signInForm = document.getElementById('signInForm');
+            if (signInForm) {
+                signInForm.addEventListener('submit', function (e) {
+                    e.preventDefault();
 
-            const email = document.getElementById('signinEmail').value;
-            const password = document.getElementById('signinPassword').value;
-            const message = document.getElementById('signinMessage');
-            
-            if (email === defaultEmail && password === defaultPassword) {
-                message.textContent = 'Login successful! Redirecting...';
-                message.style.color = '#28a745';
-                message.style.display = 'block';
+                    const email = document.getElementById('signinEmail').value.trim();
+                    const password = document.getElementById('signinPassword').value;
+                    const message = document.getElementById('signinMessage');
 
+                    /* Default admin login */
+                    if (email === defaultEmail && password === defaultPassword) {
+                        sessionStorage.setItem("loggedIn", "true");
+                        message.textContent = 'Login successful! Redirecting...';
+                        message.style.color = '#28a745';
+                        message.style.display = 'block';
 
-                setTimeout(() => {
-                    window.location.href = 'home.html';
-                }, 1000);
-                return;
-            }
+                        setTimeout(() => {
+                            window.location.href = 'home.html';
+                        }, 1000);
+                        return;
+                    }
 
+                    const storedUser = localStorage.getItem('user_' + email);
 
-            const storedUser = localStorage.getItem('user_' + email);
+                    if (storedUser) {
+                        const userData = JSON.parse(storedUser);
 
-            if (storedUser) {
-                const userData = JSON.parse(storedUser);
+                        if (userData.password === password) {
+                            sessionStorage.setItem("loggedIn", "true");
+                            message.textContent = 'Login successful! Redirecting...';
+                            message.style.color = '#28a745';
+                            message.style.display = 'block';
 
-                if (userData.password === password) {
-                    message.textContent = 'Login successful! Redirecting...';
-                    message.style.color = '#28a745';
-                    message.style.display = 'block';
+                            setTimeout(() => {
+                                window.location.href = 'home.html';
+                            }, 1000);
+                        } else {
+                            message.textContent = 'Incorrect password';
+                            message.style.color = '#dc3545';
+                            message.style.display = 'block';
+                        }
+                    } else {
+                        message.textContent = 'Account not found. Please sign up first.';
+                        message.style.color = '#dc3545';
+                        message.style.display = 'block';
+                    }
+                });
+    }
 
+    /* ---------- INPUT CLEANUP ---------- */
+    ['signinEmail', 'signinPassword'].forEach(id => {
+        const field = document.getElementById(id);
+            if (field) {
+                field.addEventListener('input', () => {
+                    document.getElementById('signinMessage').style.display = 'none';
+                });
+        }
+    });
 
-                    setTimeout(() => {
-                        window.location.href = 'home.html';
-                    }, 1000);
-                } else {
-                    message.textContent = 'Incorrect password';
-                    message.style.color = '#dc3545';
-                    message.style.display = 'block';
-                }
-            } else {
-                message.textContent = 'Account not found. Please sign up first.';
-                message.style.color = '#dc3545';
-                message.style.display = 'block';
-            }
-        });
-
-
-        document.getElementById('signinEmail').addEventListener('input', function () {
-            document.getElementById('signinMessage').style.display = 'none';
-        });
-
-        document.getElementById('signinPassword').addEventListener('input', function () {
-            document.getElementById('signinMessage').style.display = 'none';
-        });
+});
     </script>
+    <script src="script.js"></script>
+   
 </body>
 
 </html>
